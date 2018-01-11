@@ -591,6 +591,10 @@ class LandmarkDetector:
                          from_color=face[fy+fill_area_max_y-1, fx+fill_area_min_x:fx+fill_area_max_x],
                          to_color=next_y_mean[fill_area_min_x:fill_area_max_x])
 
+        print(feature_points)
+        print(prev_x_mean.shape, prev_y_mean.shape)
+        print(next_x_mean.shape, next_y_mean.shape)
+
         for i in range(fw):
             if i < fill_area_min_x:
                 # Top-Left side
@@ -604,9 +608,10 @@ class LandmarkDetector:
                 gradation_height(np.reshape(face[fy:fy+mean_y_upper+1, fx+mean_x_upper], (mean_y_upper+1, 1, 3)),
                                  from_color=prev_y_mean[mean_x_upper],
                                  to_color=mean_value_upper)
-                gradation_width(np.reshape(face[fy+mean_y_upper, fx:fx+mean_x_upper+1], (1, mean_x_upper+1, 3)),
-                                from_color=prev_x_mean[mean_y_upper],
-                                to_color=mean_value_upper)
+                if mean_y_upper >= 0:
+                    gradation_width(np.reshape(face[fy+mean_y_upper, fx:fx+mean_x_upper+1], (1, mean_x_upper+1, 3)),
+                                    from_color=prev_x_mean[mean_y_upper],
+                                    to_color=mean_value_upper)
                 # print('(%d, %d)' % (fy+mean_y_upper+1, fx+mean_x_upper),face[fy+mean_y_upper+1][fx+mean_x_upper],
                 #       '(%d, %d)' % (fy+mean_y_upper, fx+mean_x_upper+1), face[fy+mean_y_upper][fx+mean_x_upper+1])
                 # print('Mean X: (%d, %d)' % (fy+mean_y_upper, fx+mean_x_upper), face[fy+mean_y_upper][fx+mean_x_upper])
@@ -619,9 +624,10 @@ class LandmarkDetector:
                 gradation_height(np.reshape(face[fy+mean_y_lower-1:fy+fh, fx + mean_x_lower], ((fh-mean_y_lower)+1, 1, 3)),
                                  from_color=mean_value_lower,
                                  to_color=next_y_mean[mean_x_lower])
-                gradation_width(np.reshape(face[fy+mean_y_lower, fx:fx+mean_x_lower+1], (1, mean_x_lower+1, 3)),
-                                from_color=prev_x_mean[mean_y_lower],
-                                to_color=mean_value_lower)
+                if mean_y_lower < prev_x_mean.shape[0]:
+                    gradation_width(np.reshape(face[fy+mean_y_lower, fx:fx+mean_x_lower+1], (1, mean_x_lower+1, 3)),
+                                    from_color=prev_x_mean[mean_y_lower],
+                                    to_color=mean_value_lower)
                 # print('(%d, %d)' % (fy+mean_y_lower-1, fx+mean_x_lower), face[fy + mean_y_lower-1][fx + mean_x_lower],
                 #       '(%d, %d)' % (fy+mean_y_lower, fx+mean_x_lower+1), face[fy + mean_y_lower][fx + mean_x_lower+1])
                 # print('Mean Y: (%d, %d)'%(fy+mean_y_lower, fx+mean_x_lower), face[fy+mean_y_lower][fx+mean_x_lower])
@@ -635,9 +641,10 @@ class LandmarkDetector:
                 gradation_height(np.reshape(face[fy:fy+mean_y_upper+1, fx+mean_x_upper], (mean_y_upper+1, 1, 3)),
                                  from_color=prev_y_mean[mean_x_upper],
                                  to_color=mean_value_upper)
-                gradation_width(np.reshape(face[fy+mean_y_upper, fx+mean_x_upper-1:fx+fw], (1, (fw-mean_x_upper)+1, 3)),
-                                from_color=mean_value_upper,
-                                to_color=next_x_mean[mean_y_upper])
+                if mean_y_upper >= 0:
+                    gradation_width(np.reshape(face[fy+mean_y_upper, fx+mean_x_upper-1:fx+fw], (1, (fw-mean_x_upper)+1, 3)),
+                                    from_color=mean_value_upper,
+                                    to_color=next_x_mean[mean_y_upper])
 
                 # Bottom-Right side
                 mean_y_lower = fill_area_max_y + (i-fill_area_max_x)
@@ -647,9 +654,10 @@ class LandmarkDetector:
                 gradation_height(np.reshape(face[fy+mean_y_lower-1:fy+fh, fx+mean_x_lower], ((fh-mean_y_lower)+1, 1, 3)),
                                  from_color=mean_value_lower,
                                  to_color=next_y_mean[mean_x_lower])
-                gradation_width(np.reshape(face[fy+mean_y_lower, fx+mean_x_lower-1:fx+fw], (1, (fw-mean_x_lower)+1, 3)),
-                                from_color=mean_value_lower,
-                                to_color=next_x_mean[mean_y_lower])
+                if mean_y_lower < next_x_mean.shape[0]:
+                    gradation_width(np.reshape(face[fy+mean_y_lower, fx+mean_x_lower-1:fx+fw], (1, (fw-mean_x_lower)+1, 3)),
+                                    from_color=mean_value_lower,
+                                    to_color=next_x_mean[mean_y_lower])
 
         cv2.imshow('Face', face)
         cv2.waitKey()

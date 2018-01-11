@@ -1,7 +1,7 @@
 import cv2
 import detector
 
-# img = cv2.imread('images/images.jpg')
+img = cv2.imread('images/images.jpg')
 # img = cv2.imread('images/bang_hair.jpg')
 # img = cv2.imread('images/bang_hair2.jpg')
 # img = cv2.imread('images/bang_hair3.jpg') # no face
@@ -9,7 +9,7 @@ import detector
 # img = cv2.imread('images/bang_hair5.jpg') # no eyes
 # img = cv2.imread('images/bang_hair6.jpg') # no eyes, no nose, no mouth
 # img = cv2.imread('images/bang_hair7.jpg') # wrong nose
-img = cv2.imread('images/bang_hair8.jpg')
+# img = cv2.imread('images/bang_hair8.jpg')
 # img = cv2.imread('images/face_with_glasses.jpg') # no face
 # img = cv2.imread('images/face_with_glasses2.jpg')
 # img = cv2.imread('images/face_with_glasses3.jpg') # no eyes, wrong nose
