@@ -1,6 +1,9 @@
 import cv2
 import detector
 
+
+
+
 # img = cv2.imread('images/images.jpg')
 img = cv2.imread('images/bang_hair.jpg')
 # img = cv2.imread('images/bang_hair2.jpg')
@@ -26,7 +29,10 @@ d = detector.LandmarkDetector()
 # cv2.waitKey()
 # cv2.destroyAllWindows()
 
-features, points = d.detect_facial_feature(img, visible=True)
+features, points = d.detect_facial_feature(img, visible=False)
+
+# print('right_eye_side', d.range_from_landmark(features['right_eye_side']))
+
 #
 # for key, value in features.items():
 #     cv2.imshow(key, value)

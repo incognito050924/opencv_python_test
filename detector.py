@@ -19,6 +19,7 @@ import math
 #         result[y, 0:w] = add_color(from_color, color_weight * (y+1))
 #     return result
 
+
 def gradation_width(img, from_color, to_color):
     h, w = img.shape[:2]
     if w <= 0:
@@ -321,6 +322,16 @@ class LandmarkDetector:
 
         return overlay
 
+    def calc_appended_image_size(self, img_points):
+        # print(img_points)
+        width = np.max(img_points, axis=0)[2]
+        height = 0
+        for i, pts in enumerate(img_points):
+            height += pts[3]
+
+        return (height, width)
+
+
     def expand_eye(self, eyes, x_rate=1.6, y_rate=2.0):
         """
         눈 영역을 확장한다.
@@ -591,9 +602,9 @@ class LandmarkDetector:
                          from_color=face[fy+fill_area_max_y-1, fx+fill_area_min_x:fx+fill_area_max_x],
                          to_color=next_y_mean[fill_area_min_x:fill_area_max_x])
 
-        print(feature_points)
-        print(prev_x_mean.shape, prev_y_mean.shape)
-        print(next_x_mean.shape, next_y_mean.shape)
+        # print(feature_points)
+        # print(prev_x_mean.shape, prev_y_mean.shape)
+        # print(next_x_mean.shape, next_y_mean.shape)
 
         for i in range(fw):
             if i < fill_area_min_x:
@@ -734,7 +745,7 @@ class LandmarkDetector:
         min_x, min_y, max_x, max_y = self.range_from_landmark(expanded_landmark)
         nose_pts = (min_x, min_y, max_x - min_x, max_y - min_y)
         # face = self.remove_features(img, nose_pts)
-        face = self.remove_feature(img, nose_pts, np.array([200, 200, 250], np.uint8))
+        face = self.remove_feature(img, nose_pts, np.array([200, 200, 200], np.uint8))
         return face[y:y + h, x:x + w]
 
     def remove_mouth(self, img, landmark, face_pts):
@@ -764,6 +775,8 @@ class LandmarkDetector:
 
         removed_landmarks_img = img.copy()
         skin = None
+        pore_rois = None
+        wrinkle_rois = None
 
         glabella_min_x, glabella_min_y, glabella_max_x, glabella_max_y, glabella_mid_y = (-1, -1, -1, -1, 0)
         right_cheek_min_x, right_cheek_min_y, right_cheek_max_x, right_cheek_max_y = (-1, -1, -1, -1)
@@ -784,6 +797,11 @@ class LandmarkDetector:
                 side_max_x = min_x
                 points['right_eye_side'] = [(side_min_x, min_y, side_max_x - side_min_x, max_y - min_y)]
                 features['right_eye_side'] = img[min_y:max_y, side_min_x:side_max_x]
+                right_eye_side = np.array(points['right_eye_side'])
+                if wrinkle_rois is not None:
+                    wrinkle_rois = np.vstack((wrinkle_rois, right_eye_side))
+                else:
+                    wrinkle_rois = right_eye_side
                 cv2.rectangle(overlay, (side_min_x, min_y), (side_max_x, max_y), (255, 255, 0), 2)
                 # 오른쪽 볼 이미지 추가 사전 작업(1/2)
                 pts = landmarks[feature]
@@ -795,6 +813,11 @@ class LandmarkDetector:
                 side_max_x = max_x + int((max_x - min_x) * 0.7)
                 points['left_eye_side'] = [(side_min_x, min_y, side_max_x - side_min_x, max_y - min_y)]
                 features['left_eye_side'] = img[min_y:max_y, side_min_x:side_max_x]
+                left_eye_side = np.array(points['left_eye_side'])
+                if wrinkle_rois is not None:
+                    wrinkle_rois = np.vstack((wrinkle_rois, left_eye_side))
+                else:
+                    wrinkle_rois = left_eye_side
                 cv2.rectangle(overlay, (side_min_x, min_y), (side_max_x, max_y), (255, 255, 0), 2)
                 # 왼쪽 볼 이미지 추가 사전 작업(1/2)
                 pts = landmarks[feature]
@@ -821,6 +844,11 @@ class LandmarkDetector:
                 min_nx, min_ny, max_nx, max_ny = self.range_from_landmark(nose_for_pore)
                 points['nose_for_pore'] = [(min_nx, min_ny, max_nx - min_nx, max_ny - min_ny)]
                 features['nose_for_pore'] = img[min_ny:max_ny, min_nx:max_nx]
+                nose_for_pore = np.array(points['nose_for_pore'])
+                if pore_rois is not None:
+                    pore_rois = np.vstack((pore_rois, nose_for_pore))
+                else:
+                    pore_rois = nose_for_pore
                 cv2.rectangle(overlay, (min_nx, min_ny), (max_nx, max_ny), (255, 255, 0), 2)
             elif feature == 'mouth':
                 pass
@@ -831,6 +859,11 @@ class LandmarkDetector:
             glabella_min_y = glabella_mid_y - int((glabella_max_y - glabella_mid_y) * 1.3)
             points['glabella'] = [(glabella_min_x, glabella_min_y, glabella_max_x - glabella_min_x, glabella_max_y - glabella_min_y)]
             features['glabella'] = img[glabella_min_y:glabella_max_y, glabella_min_x:glabella_max_x]
+            glabella = np.array(points['glabella'])
+            if wrinkle_rois is not None:
+                wrinkle_rois = np.vstack((wrinkle_rois, glabella))
+            else:
+                wrinkle_rois = glabella
             cv2.rectangle(overlay, (glabella_min_x, glabella_min_y), (glabella_max_x, glabella_max_y), (255, 0, 255), 2)
 
         # 오른쪽 볼 추가
@@ -838,6 +871,11 @@ class LandmarkDetector:
             points['right_cheek'] = [(right_cheek_min_x, right_cheek_min_y, right_cheek_max_x - right_cheek_min_x,
                                       right_cheek_max_y - right_cheek_min_y)]
             features['right_cheek'] = img[right_cheek_min_y:right_cheek_max_y, right_cheek_min_x:right_cheek_max_x]
+            right_cheek = np.array(points['right_cheek'])
+            if pore_rois is not None:
+                pore_rois = np.vstack((pore_rois, right_cheek))
+            else:
+                pore_rois = right_cheek
             cv2.rectangle(overlay, (right_cheek_min_x, right_cheek_min_y), (right_cheek_max_x, right_cheek_max_y), (255, 0, 255), 2)
 
         # 왼쪽 볼 추가
@@ -845,6 +883,11 @@ class LandmarkDetector:
             points['left_cheek'] = [(left_cheek_min_x, left_cheek_min_y, left_cheek_max_x - left_cheek_min_x,
                                       left_cheek_max_y - left_cheek_min_y)]
             features['left_cheek'] = img[left_cheek_min_y:left_cheek_max_y, left_cheek_min_x:left_cheek_max_x]
+            left_cheek = np.array(points['left_cheek'])
+            if pore_rois is not None:
+                pore_rois = np.vstack((pore_rois, left_cheek))
+            else:
+                pore_rois = left_cheek
             cv2.rectangle(overlay, (left_cheek_min_x, left_cheek_min_y), (left_cheek_max_x, left_cheek_max_y), (255, 0, 255), 2)
 
         # 눈, 코, 입 제거한 이미지 추가
@@ -857,6 +900,30 @@ class LandmarkDetector:
                     skin = self.remove_nose(removed_landmarks_img, landmarks[key], face_pts)
                 elif key == 'mouth':
                     skin = self.remove_mouth(removed_landmarks_img, landmarks[key], face_pts)
+
+        # 모공 분석용 이미지들을 하나의 이미지로 만듦. Vertical append
+        if len(pore_rois) > 0:
+            pore_height, pore_width = self.calc_appended_image_size(np.array(pore_rois))
+            # background_color = np.array([255, 255, 255], np.uint8)
+            pore_img = np.full((pore_height, pore_width, 3), 255, dtype=np.uint8)
+            prev_height = 0
+            for i, pts in enumerate(pore_rois):
+                temp_x, temp_y, temp_w, temp_h = pts
+                pore_img[prev_height:prev_height+temp_h, 0:temp_w] = img[temp_y:temp_y+temp_h, temp_x:temp_x+temp_w].copy()
+                prev_height += temp_h
+            features['pore_roi'] = pore_img
+
+        # 주름 분석용 이미지들을 하나의 이미지로 만듦. Vertical append
+        if len(wrinkle_rois) > 0:
+            wrinkle_height, wrinkle_width = self.calc_appended_image_size(np.array(wrinkle_rois))
+            # background_color = np.array([255, 255, 255], np.uint8)
+            wrinkle_img = np.full((wrinkle_height, wrinkle_width, 3), 255, dtype=np.uint8)
+            prev_height = 0
+            for i, pts in enumerate(wrinkle_rois):
+                temp_x, temp_y, temp_w, temp_h = pts
+                wrinkle_img[prev_height:prev_height+temp_h, 0:temp_w] = img[temp_y:temp_y+temp_h, temp_x:temp_x+temp_w].copy()
+                prev_height += temp_h
+            features['wrinkle_roi'] = wrinkle_img
 
         if visible:
             cv2.imshow('Features', overlay)
