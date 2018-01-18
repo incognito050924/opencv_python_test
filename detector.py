@@ -550,7 +550,7 @@ class LandmarkDetector:
     #
     #     return overlay
 
-    def remove_feature(self, face, feature_points, fill_color, fill_area_rate=0.6, mean_range=10):
+    def remove_feature(self, face, feature_points, fill_color, fill_area_rate=0.3, mean_range=10):
         (fx, fy, fw, fh) = feature_points
         feature = face[fy:fy + fh, fx:fx + fw]
 

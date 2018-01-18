@@ -2,6 +2,7 @@ import cv2
 import dlib
 import numpy as np
 import math
+import seam_carving
 
 
 def get_cosine_kernel(x_size, y_size=None):
@@ -357,12 +358,21 @@ class CascadeDetector:
                 cv2.rectangle(roi_color, (nx+nw, ey+eh), (ex+ew, int((ny+ny+nh) / 2)), (255, 0, 255), 2)
 
             removed_features_on_face = face
+            # if len(eyes) == 1:
+            #     removed_features_on_face = self.feature_smoothing(removed_features_on_face, eyes[0])
+            # if len(nose) == 1:
+            #     removed_features_on_face = self.feature_smoothing(removed_features_on_face, nose[0])
+            # if len(mouth) == 1:
+            #     removed_features_on_face = self.feature_smoothing(removed_features_on_face, mouth[0])
+            # roi_data['skin'] = removed_features_on_face
+
             if len(eyes) == 1:
-                removed_features_on_face = self.feature_smoothing(removed_features_on_face, eyes[0])
+                pass
+                #removed_features_on_face = seam_carving.remove_object(removed_features_on_face, eyes[0])
             if len(nose) == 1:
-                removed_features_on_face = self.feature_smoothing(removed_features_on_face, nose[0])
+                removed_features_on_face = seam_carving.remove_object(removed_features_on_face, nose[0])
             if len(mouth) == 1:
-                removed_features_on_face = self.feature_smoothing(removed_features_on_face, mouth[0])
+                removed_features_on_face = seam_carving.remove_object(removed_features_on_face, mouth[0])
             roi_data['skin'] = removed_features_on_face
 
             if visible:

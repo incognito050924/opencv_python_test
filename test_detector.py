@@ -1,8 +1,8 @@
 import cv2
 import detector
 
-img = cv2.imread('images/images.jpg')
-# img = cv2.imread('images/bang_hair.jpg')
+# img = cv2.imread('images/images.jpg')
+img = cv2.imread('images/bang_hair.jpg')
 # img = cv2.imread('images/bang_hair2.jpg')
 # img = cv2.imread('images/bang_hair3.jpg') # no face
 # img = cv2.imread('images/bang_hair4.jpg') # no face

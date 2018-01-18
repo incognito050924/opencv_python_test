@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # img = cv2.imread('images/kate-upton.jpg')
-img = cv2.imread('images/images.jpg')
-# img = cv2.imread('images/bang_hair.jpg')
+# img = cv2.imread('images/images.jpg')
+img = cv2.imread('images/bang_hair.jpg')
 # img = cv2.imread('images/bang_hair2.jpg')
 # img = cv2.imread('images/bang_hair3.jpg') # no face
 # img = cv2.imread('images/bang_hair4.jpg') # no face
@@ -36,7 +36,7 @@ img = cv2.imread('images/images.jpg')
 # detector.detect_facial_feature(img, visible=True)
 
 detector = face_detector.CascadeDetector()
-detector.test_mean(img)
+detector.detect_facial_feature(img, visible=True)
 
 # cv2.imshow('Face', features['face'])
 # cv2.imshow('Eyes', features['eyes'])
