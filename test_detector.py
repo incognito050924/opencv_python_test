@@ -1,11 +1,10 @@
 import cv2
 import detector
+import skin_analyzer
 
 
-
-
-# img = cv2.imread('images/images.jpg')
-img = cv2.imread('images/bang_hair.jpg')
+img = cv2.imread('images/images.jpg')
+# img = cv2.imread('images/bang_hair.jpg')
 # img = cv2.imread('images/bang_hair2.jpg')
 # img = cv2.imread('images/bang_hair3.jpg') # no face
 # img = cv2.imread('images/bang_hair4.jpg') # no face
@@ -46,3 +45,11 @@ features, points = d.detect_facial_feature(img, visible=False)
 # cv2.imshow('Edges', edges)
 # cv2.waitKey()
 # cv2.destroyAllWindows()
+
+extractor = skin_analyzer.Extractor()
+extractor.extract_pore(features['pore_roi'])
+extractor.extract_pigmentation(features['skin_roi'])
+extractor.extract_wrinkle(features['wrinkle_roi'])
+extractor.extract_erythema(features['skin_roi'])
+print(extractor.pore, extractor.pigmentation, extractor.wrinkle, extractor.erythema)
+analyzer = skin_analyzer.Analyzer()

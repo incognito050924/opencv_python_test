@@ -670,9 +670,9 @@ class LandmarkDetector:
                                     from_color=mean_value_lower,
                                     to_color=next_x_mean[mean_y_lower])
 
-        cv2.imshow('Face', face)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
+        # cv2.imshow('Face', face)
+        # cv2.waitKey()
+        # cv2.destroyAllWindows()
         return face
 
 
@@ -900,6 +900,7 @@ class LandmarkDetector:
                     skin = self.remove_nose(removed_landmarks_img, landmarks[key], face_pts)
                 elif key == 'mouth':
                     skin = self.remove_mouth(removed_landmarks_img, landmarks[key], face_pts)
+            features['skin_roi'] = skin
 
         # 모공 분석용 이미지들을 하나의 이미지로 만듦. Vertical append
         if len(pore_rois) > 0:
